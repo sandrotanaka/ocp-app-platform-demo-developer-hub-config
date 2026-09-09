@@ -50,6 +50,12 @@ spec:
           key: lightspeed-stack.yaml
           containers:
             - lightspeed-core
+        # Llama Stack config with persistent Notebooks/files/metadata stores on the PVC below.
+        - name: llama-stack-custom
+          mountPath: /app-root
+          key: config.yaml
+          containers:
+            - lightspeed-core
     route:
       enabled: true
   deployment:
@@ -65,11 +71,34 @@ spec:
           type: Recreate
         template:
           spec:
+            initContainers:
+              # Prepares the Notebooks PVC (owned by root on first bind) for the non-root LCORE user.
+              - name: init-notebooks-storage
+                image: registry.access.redhat.com/ubi9/ubi-minimal:latest
+                command:
+                  - sh
+                  - -c
+                  - mkdir -p /var/lib/lightspeed-data/notebooks /var/lib/lightspeed-data/files /var/lib/lightspeed-data/feedback && chmod -R a+rwX /var/lib/lightspeed-data
+                resources:
+                  requests: { cpu: 10m, memory: 32Mi }
+                  limits: { cpu: 100m, memory: 64Mi }
+                volumeMounts:
+                  - name: lightspeed-notebooks
+                    mountPath: /var/lib/lightspeed-data
+            containers:
+              # Merged by name into the Operator-injected LCORE sidecar.
+              - name: lightspeed-core
+                volumeMounts:
+                  - name: lightspeed-notebooks
+                    mountPath: /var/lib/lightspeed-data
             volumes:
               # Keep dynamic plugins on a PVC so the install step is not repeated on every restart.
               - $patch: replace
                 name: dynamic-plugins-root
                 persistentVolumeClaim:
                   claimName: dynamic-plugins-root
+              - name: lightspeed-notebooks
+                persistentVolumeClaim:
+                  claimName: lightspeed-notebooks-pvc
   database:
     enableLocalDb: true

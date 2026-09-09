@@ -25,13 +25,14 @@ data:
       library_client_config_path: /app-root/config.yaml
     user_data_collection:
       feedback_enabled: true
-      feedback_storage: '/tmp/data/feedback'
+      feedback_storage: '/var/lib/lightspeed-data/feedback'
     authentication:
       module: 'noop'
+    # Chat history survives restarts on the lightspeed-notebooks PVC.
     conversation_cache:
       type: 'sqlite'
       sqlite:
-        db_path: '/tmp/cache.db'
+        db_path: '/var/lib/lightspeed-data/cache.db'
     customization:
       profile_path: '/app-root/rhdh-profile.py'
     # The portal's own MCP server. `name` must match lightspeed.mcpServers[].name in app-config, and

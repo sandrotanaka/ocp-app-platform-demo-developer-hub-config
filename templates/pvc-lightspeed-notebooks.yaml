@@ -1,0 +1,17 @@
+# Persistent storage for Lightspeed Personal AI Notebooks (Developer Preview) and LCORE metadata.
+# Without it every notebook, uploaded file and chat history is lost on Pod restart.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: lightspeed-notebooks-pvc
+  namespace: rhdh
+  labels:
+    app.kubernetes.io/name: backstage
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi

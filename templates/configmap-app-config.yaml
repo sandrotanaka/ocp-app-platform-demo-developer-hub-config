@@ -119,6 +119,10 @@ data:
           - catalog
           - scaffolder
       auth:
+        # Encrypts per-user MCP tokens stored by the Lightspeed plugin (MCP Server Settings).
+        # Without this the backend logs "Token encryption disabled" and stores them in plaintext.
+        keys:
+          - secret: ${BACKEND_SECRET}
         externalAccess:
           - type: static
             options:
