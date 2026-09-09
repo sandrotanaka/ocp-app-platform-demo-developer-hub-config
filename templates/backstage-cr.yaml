@@ -8,6 +8,12 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "1"
 spec:
+  # RHDH 1.10: Developer Lightspeed is a default-enabled Operator "flavour". The Operator injects the
+  # lightspeed-core sidecar (Llama Stack as a library client), the RAG init container, and the default
+  # llama-stack / lightspeed-stack / rhdh-profile ConfigMaps. Nothing is declared by hand any more.
+  flavours:
+    - name: lightspeed
+      enabled: true
   application:
     appConfig:
       mountPath: /opt/app-root/src
@@ -29,8 +35,21 @@ spec:
         - name: backend-secret
         - name: backstage-orchestrator-token
         - name: sonarqube-secret
+        # Inference provider credentials and guardrail settings for the LCORE sidecar.
+        # 1.10 contract: the Secret is wired through extraEnvs, scoped to the lightspeed-core container.
+        - name: lightspeed-auth-secrets
+          containers:
+            - lightspeed-core
     extraFiles:
       mountPath: /opt/app-root/src
+      configMaps:
+        # Custom LCORE configuration (mcp_servers block). Mapping it here is what protects it from being
+        # overwritten by the Operator on reconcile.
+        - name: lightspeed-stack
+          mountPath: /app-root
+          key: lightspeed-stack.yaml
+          containers:
+            - lightspeed-core
     route:
       enabled: true
   deployment:
@@ -38,61 +57,12 @@ spec:
       spec:
         replicas: 1
         template:
-          spec:            
-            containers:
-              - env:
-                  - name: VALIDATION_PROVIDER
-                    value: vllm
-                  - name: VALIDATION_MODEL_NAME
-                    value: qwen3-14b
-                envFrom:
-                  - secretRef:
-                      name: llama-stack-secrets
-                  - secretRef:
-                      name: backend-secret                      
-                image: 'quay.io/redhat-ai-dev/llama-stack:0.1.4' # Llama Stack image
-                name: llama-stack
-                volumeMounts:
-                  - mountPath: /app-root/.llama
-                    name: shared-storage
-                  - mountPath: /rag-content
-                    name: rag-data-volume
-              - image: 'quay.io/lightspeed-core/lightspeed-stack:0.4.0' # Lightspeed Core Service image
-                name: lightspeed-core
-                envFrom:
-                  - secretRef:
-                      name: backend-secret
-                volumeMounts:
-                  - mountPath: /app-root/lightspeed-stack.yaml
-                    name: lightspeed-stack
-                    subPath: lightspeed-stack.yaml
-                  - mountPath: /tmp/data/feedback
-                    name: shared-storage
-                  - mountPath: /tmp/data/transcripts
-                    name: shared-storage
-                  - mountPath: /tmp/data/conversations
-                    name: shared-storage
-            initContainers:
-              - name: init-rag-data
-                image: 'quay.io/redhat-ai-dev/rag-content:release-1.9-lcs'
-                command:
-                  - "sh"
-                  - "-c"
-                  - "echo 'Copying RAG data...'; cp -r /rag/vector_db/rhdh_product_docs /rag-content/ && cp -r /rag/embeddings_model /rag-content/ && echo 'Copy complete.'"
-                volumeMounts:
-                  - mountPath: /rag-content
-                    name: rag-data-volume
+          spec:
             volumes:
+              # Keep dynamic plugins on a PVC so the install step is not repeated on every restart.
               - $patch: replace
                 name: dynamic-plugins-root
                 persistentVolumeClaim:
                   claimName: dynamic-plugins-root
-              - configMap:
-                  name: lightspeed-stack
-                name: lightspeed-stack
-              - emptyDir: {}
-                name: shared-storage
-              - emptyDir: {}
-                name: rag-data-volume
   database:
     enableLocalDb: true

@@ -26,9 +26,27 @@ data:
             Tell me about the capabilities of Red Hat Developer Lightspeed and its integration with the MCP tools of
             this instance of Red Hat Developer Hub.
 
+        - title: Golden path
+          message: Which software templates can I use, and what does each one create for me?
+
+        - title: Dry run a template
+          message: Validate the parasol-insurance template with a dry run before I execute it.
+
+        - title: Docs coverage
+          message: Which components in the catalog are missing TechDocs?
+
       mcpServers:
       - name: mcp::backstage
         token: ${MCP_SECRET}
+
+      # Personal AI Notebooks (Developer Preview in 1.10): private, document-grounded workspaces.
+      # The model name must match /v1/models on the provider exactly. Storage is ephemeral unless a
+      # PVC is mounted on the lightspeed-core container.
+      notebooks:
+        enabled: true
+        queryDefaults:
+          model: qwen3-14b
+          provider_id: vllm
 
       # OPTIONAL: Port for lightspeed service (default: 8080)
       # servicePort: ${LIGHTSPEED_SERVICE_PORT}
@@ -51,10 +69,13 @@ data:
 
         Prefer **live data from this RHDH instance** via MCP before guessing:
 
-        * **fetch-catalog-entities** — List or look up catalog entities (components, APIs, systems, resources, etc.).
-        * **knowledge_search** — Knowledge search in the catalog.
-        * **software-template-metadata-tool** — Metadata for Software Templates available in this hub.
-        * **fetch-techdocs**, **retrieve-techdocs-content**, **analyze-techdocs-coverage** — Search, analyze documentation coverage, and read TechDocs tied to entities in this instance.
+        * **Software Catalog tools** — list or look up catalog entities (components, APIs, systems, resources), register
+          and unregister entities, and read Software Template metadata.
+        * **TechDocs tools** — fetch TechDocs URLs and metadata, retrieve document content, and analyze TechDocs coverage
+          across the catalog.
+        * **Scaffolder tools** — list scaffolder actions, dry-run a Software Template, execute it, and monitor the task.
+          Before running any tool that creates or changes a resource, state what you are about to do and wait for
+          confirmation. Prefer a dry run first.
 
         Call these tools **early** when the question involves "what we have in the catalog," a named component/API,
         template parameters, or in-portal documentation. Summarize tool results clearly and tie them back to **what
@@ -89,9 +110,14 @@ data:
         port: 7007
         host: 0.0.0.0
       actions:
+        # Installed MCP tool plugins must be registered here or their tools never appear (no error).
+        # RHDH 1.10: the *-mcp-tool packages are deprecated; use the *-mcp-extras packages.
         pluginSources:
-          - software-catalog-mcp-tool
-          - techdocs-mcp-tool
+          - software-catalog-mcp-extras
+          - techdocs-mcp-extras
+          - scaffolder-mcp-extras
+          - catalog
+          - scaffolder
       auth:
         externalAccess:
           - type: static
