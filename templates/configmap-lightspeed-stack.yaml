@@ -33,6 +33,11 @@ data:
       type: 'sqlite'
       sqlite:
         db_path: '/var/lib/lightspeed-data/cache.db'
+    # LCORE application database (conversation IDs and runtime data). Default is /tmp/lightspeed-stack.db;
+    # left there, every Notebook/chat conversation returns "Conversation ... not found" after a restart.
+    database:
+      sqlite:
+        db_path: '/var/lib/lightspeed-data/lightspeed-stack.db'
     customization:
       profile_path: '/app-root/rhdh-profile.py'
     # The portal's own MCP server. `name` must match lightspeed.mcpServers[].name in app-config, and
