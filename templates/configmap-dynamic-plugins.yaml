@@ -362,9 +362,12 @@ data:
                     config:
                       layout:
                         gridColumn: 1 / -1
+                      # The tab only renders (and the plugin only mounts) for components that actually
+                      # declare a Quay repository; otherwise the plugin throws "'Quay' annotations are missing".
                       if:
                         allOf:
                           - isKind: component
+                          - hasAnnotation: quay.io/repository-slug
                 entityTabs:
                   - path: /image-registry
                     title: Image Registry
