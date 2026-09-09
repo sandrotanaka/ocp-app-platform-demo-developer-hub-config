@@ -180,7 +180,10 @@ data:
               timeout: { minutes: 1 }
               initialDelay: { seconds: 15 }
         gitlab:
-          gitlab:
+          # RHDH 1.10: the bundled gitlab-discovery-entity-provider module ships a default config that
+          # requires catalog.providers.gitlab.default.host. The provider must be keyed "default" so this
+          # block overrides it; any other key leaves the default entry incomplete and the backend aborts.
+          default:
             host: {{ .Values.gitlab.host }}
             branch: main
             fallbackBranch: main
