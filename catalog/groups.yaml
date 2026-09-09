@@ -1,0 +1,83 @@
+# Teams referenced as owners by the demo catalog at
+# https://github.com/evanshortiss/from-ai-hype-to-platform-reality (catalog/), which defines no Group entities.
+# Registered as an extra catalog location from app-config so the owner relations resolve.
+# Members map onto the Keycloak demo users already synced into the catalog (pe1, pe2, dev1, dev2).
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: platform-engineering
+  title: Platform Engineering
+  description: Owns the shared platform, golden-path templates, messaging and data infrastructure.
+spec:
+  type: team
+  children: []
+  members: [pe1, pe2]
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: ai-team
+  title: AI Team
+  description: Owns the AI services (embeddings, structured output) of the customer service platform.
+spec:
+  type: team
+  parent: platform-engineering
+  children: []
+  members: [dev1]
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: finance-team
+  title: Finance Team
+  description: Owns the finance API and the finance AI assistant.
+spec:
+  type: team
+  children: []
+  members: [dev2]
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: support-team
+  title: Support Team
+  description: Owns the customer support UI and the support AI assistant.
+spec:
+  type: team
+  children: []
+  members: [dev1, dev2]
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: website-team
+  title: Website Team
+  description: Owns the public website AI assistant and its MCP server.
+spec:
+  type: team
+  children: []
+  members: [dev2]
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: customer-team
+  title: Customer Data Team
+  description: Owns the customer data service.
+spec:
+  type: team
+  children: []
+  members: [dev1]
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: safety-team
+  title: Safety Team
+  description: Owns content moderation for AI-generated responses.
+spec:
+  type: team
+  parent: platform-engineering
+  children: []
+  members: [pe2]

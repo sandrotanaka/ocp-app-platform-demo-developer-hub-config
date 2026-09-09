@@ -171,6 +171,11 @@ data:
           target: https://github.com/evanshortiss/from-ai-hype-to-platform-reality/blob/main/catalog/catalog-info.yaml
           rules:
             - allow: [Component, System, API, Resource, Location, Template, Domain, User, Group]
+        # Groups used as owners by the location above; that repository does not define them.
+        - type: url
+          target: https://github.com/sandrotanaka/ocp-app-platform-demo-developer-hub-config/blob/rhdh-1.10/catalog/groups.yaml
+          rules:
+            - allow: [Group]
       providers:
         keycloakOrg:
           default:
