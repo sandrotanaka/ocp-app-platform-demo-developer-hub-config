@@ -78,7 +78,9 @@ spec:
                 command:
                   - sh
                   - -c
-                  - mkdir -p /var/lib/lightspeed-data/notebooks /var/lib/lightspeed-data/files /var/lib/lightspeed-data/feedback && chmod -R a+rwX /var/lib/lightspeed-data
+                  # The mount root is root-owned; OpenShift fsGroup already makes it group-writable, so only
+                  # the subdirectories are created and relaxed. chmod on the root fails with EPERM.
+                  - mkdir -p /var/lib/lightspeed-data/notebooks /var/lib/lightspeed-data/files /var/lib/lightspeed-data/feedback && chmod -R a+rwX /var/lib/lightspeed-data/notebooks /var/lib/lightspeed-data/files /var/lib/lightspeed-data/feedback
                 resources:
                   requests: { cpu: 10m, memory: 32Mi }
                   limits: { cpu: 100m, memory: 64Mi }
