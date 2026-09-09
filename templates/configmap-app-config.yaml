@@ -167,15 +167,14 @@ data:
       rules:
         - allow: [Component, System, API, Resource, Location, Template, Domain]
       locations:
+        # Demo catalog (AI customer-service platform + owner teams). Source of truth is
+        # github.com/sandrotanaka/rhdh-demo-catalog; the gitlab chart imports it into the in-cluster
+        # GitLab as rhdh/demo-catalog at provisioning time. The entry file sits under catalog/ so the
+        # GitLab discovery provider (root catalog-info.yaml only) does not register it a second time.
         - type: url
-          target: https://github.com/evanshortiss/from-ai-hype-to-platform-reality/blob/main/catalog/catalog-info.yaml
+          target: https://{{ .Values.gitlab.host }}/rhdh/demo-catalog/-/blob/main/catalog/catalog-info.yaml
           rules:
             - allow: [Component, System, API, Resource, Location, Template, Domain, User, Group]
-        # Groups used as owners by the location above; that repository does not define them.
-        - type: url
-          target: https://github.com/sandrotanaka/ocp-app-platform-demo-developer-hub-config/blob/rhdh-1.10/catalog/groups.yaml
-          rules:
-            - allow: [Group]
       providers:
         keycloakOrg:
           default:
