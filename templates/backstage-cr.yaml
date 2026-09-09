@@ -56,6 +56,13 @@ spec:
     patch:
       spec:
         replicas: 1
+        # dynamic-plugins-root is a ReadWriteOnce PVC. With RollingUpdate the old Pod keeps the volume
+        # attached until the new Pod is Ready, and the new Pod can never start (Multi-Attach error).
+        # Recreate terminates the old Pod first. $retainKeys drops the rollingUpdate parameters.
+        strategy:
+          $retainKeys:
+            - type
+          type: Recreate
         template:
           spec:
             volumes:
