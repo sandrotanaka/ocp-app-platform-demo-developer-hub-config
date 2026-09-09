@@ -1,5 +1,7 @@
 # Persistent storage for Lightspeed Personal AI Notebooks (Developer Preview) and LCORE metadata.
 # Without it every notebook, uploaded file and chat history is lost on Pod restart.
+# Same sync wave as the Backstage CR: the default storage class binds on first consumer, so a lower
+# wave would make Argo CD wait forever for the PVC to become healthy.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -8,7 +10,7 @@ metadata:
   labels:
     app.kubernetes.io/name: backstage
   annotations:
-    argocd.argoproj.io/sync-wave: "-1"
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   accessModes:
     - ReadWriteOnce
