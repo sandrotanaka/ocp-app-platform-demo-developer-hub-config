@@ -29,9 +29,6 @@ data:
         - title: Golden path
           message: Which software templates can I use, and what does each one create for me?
 
-        - title: Dry run a template
-          message: Validate the parasol-insurance template with a dry run before I execute it.
-
         - title: Docs coverage
           message: Which components in the catalog are missing TechDocs?
 
