@@ -146,6 +146,8 @@ data:
           - https://cdn.dribbble.com
           - https://avatars.githubusercontent.com
           - https://api.dicebear.com
+          # Avatars of the demo personas (rhdh/avatars, public project in the in-cluster GitLab)
+          - https://{{ .Values.gitlab.host }}
         script-src:
           - "'self'"
           - "'unsafe-eval'"
