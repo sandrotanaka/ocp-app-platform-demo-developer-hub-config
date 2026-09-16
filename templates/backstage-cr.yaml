@@ -58,6 +58,9 @@ spec:
             - lightspeed-core
     route:
       enabled: true
+  # Route timeout override (see configmap-rhdh-runtime-config.yaml)
+  rawRuntimeConfig:
+    backstageConfig: rhdh-runtime-config
   deployment:
     patch:
       spec:

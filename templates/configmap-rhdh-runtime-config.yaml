@@ -1,0 +1,33 @@
+# Operator runtime-object overrides (Backstage CR spec.rawRuntimeConfig.backstageConfig).
+# Only the keys present here replace the Operator defaults (rhdh-default-config); everything else is inherited.
+#
+# route.yaml: Developer Lightspeed Notebooks stream nothing to the browser while the model prepares the
+# file_search call (measured 20-50 s), and the OpenShift router closes idle connections after 30 s
+# ("network error" in the UI). Raise the HAProxy timeout for this route.
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: rhdh-runtime-config
+  namespace: rhdh
+  labels:
+    app.kubernetes.io/name: backstage
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+data:
+  route.yaml: |
+    apiVersion: route.openshift.io/v1
+    kind: Route
+    metadata:
+      name: route # placeholder for 'backstage-<cr-name>'
+      annotations:
+        haproxy.router.openshift.io/timeout: 300s
+    spec:
+      port:
+        targetPort: http-backend
+      path: /
+      tls:
+        insecureEdgeTerminationPolicy: Redirect
+        termination: edge
+      to:
+        kind: Service
+        name:  # placeholder for 'backstage-<cr-name>'
