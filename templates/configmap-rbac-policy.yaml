@@ -54,6 +54,29 @@ data:
     g, group:default/developers, role:default/plugins
     g, group:default/developers, role:default/workflowUser
     g, group:default/platformengineers, role:default/workflowAdmin
+    # Plataforma de Eventos (demo): usuarios juarez e sandro enxergam apenas as entidades e templates da plataforma
+    p, role:default/plataforma-eventos-leitor, catalog.entity.read, read, allow
+    p, role:default/plataforma-eventos-leitor, catalog.location.read, read, allow
+    p, role:default/plataforma-eventos-autoatendimento, scaffolder.action.execute, use, allow
+    p, role:default/plataforma-eventos-autoatendimento, scaffolder.template.parameter.read, read, allow
+    p, role:default/plataforma-eventos-autoatendimento, scaffolder.template.step.read, read, allow
+    p, role:default/plataforma-eventos-autoatendimento, scaffolder.task.create, create, allow
+    p, role:default/plataforma-eventos-autoatendimento, scaffolder.task.cancel, use, allow
+    p, role:default/plataforma-eventos-autoatendimento, scaffolder.task.read, read, allow
+    p, role:default/plataforma-eventos-assistente, lightspeed.chat.read, read, allow
+    p, role:default/plataforma-eventos-assistente, lightspeed.chat.create, create, allow
+    p, role:default/plataforma-eventos-assistente, lightspeed.chat.delete, delete, allow
+    g, group:default/plataforma-eventos-desenvolvedores, role:default/plataforma-eventos-leitor
+    g, group:default/plataforma-eventos-desenvolvedores, role:default/plataforma-eventos-autoatendimento
+    g, group:default/plataforma-eventos-desenvolvedores, role:default/plataforma-eventos-assistente
+    g, group:default/plataforma-eventos-engenharia, role:default/plataforma-eventos-leitor
+    g, group:default/plataforma-eventos-engenharia, role:default/plataforma-eventos-autoatendimento
+    g, group:default/plataforma-eventos-engenharia, role:default/plataforma-eventos-assistente
+    p, role:default/plataforma-eventos-observador, kubernetes.clusters.read, read, allow
+    p, role:default/plataforma-eventos-observador, kubernetes.resources.read, read, allow
+    p, role:default/plataforma-eventos-observador, topology.view.read, read, allow
+    p, role:default/plataforma-eventos-observador, argocd.view.read, read, allow
+    g, group:default/plataforma-eventos-engenharia, role:default/plataforma-eventos-observador
   rbac-conditional-policies.yaml: |
     ---
     result: CONDITIONAL
@@ -83,3 +106,57 @@ data:
     resourceType: catalog-entity
     result: CONDITIONAL
     roleEntityRef: role:default/developer
+    ---
+    # Plataforma de Eventos (demo): leitura do catalogo restrita as entidades com o label "plataforma"
+    # (sistema, recursos, componentes e templates da plataforma) e aos usuarios/grupos da demo
+    result: CONDITIONAL
+    roleEntityRef: 'role:default/plataforma-eventos-leitor'
+    resourceType: catalog-entity
+    pluginId: catalog
+    permissionMapping:
+      - read
+    conditions:
+      anyOf:
+        - rule: HAS_LABEL
+          resourceType: catalog-entity
+          params:
+            label: plataforma
+        - allOf:
+            - rule: IS_ENTITY_KIND
+              resourceType: catalog-entity
+              params:
+                kinds:
+                  - User
+                  - Group
+            - anyOf:
+                - rule: HAS_METADATA
+                  resourceType: catalog-entity
+                  params: {key: name, value: plataforma-eventos-desenvolvedores}
+                - rule: HAS_METADATA
+                  resourceType: catalog-entity
+                  params: {key: name, value: plataforma-eventos-engenharia}
+                - rule: HAS_METADATA
+                  resourceType: catalog-entity
+                  params: {key: name, value: juarez}
+                - rule: HAS_METADATA
+                  resourceType: catalog-entity
+                  params: {key: name, value: sandro}
+    ---
+    # Plataforma de Eventos (demo): execucao restrita as acoes usadas pelos templates da plataforma
+    result: CONDITIONAL
+    roleEntityRef: 'role:default/plataforma-eventos-autoatendimento'
+    resourceType: scaffolder-action
+    pluginId: scaffolder
+    permissionMapping:
+      - use
+    conditions:
+      anyOf:
+        - rule: HAS_ACTION_ID
+          resourceType: scaffolder-action
+          params: {actionId: catalog:fetch}
+        - rule: HAS_ACTION_ID
+          resourceType: scaffolder-action
+          params: {actionId: fetch:template}
+        - rule: HAS_ACTION_ID
+          resourceType: scaffolder-action
+          params: {actionId: publish:gitlab:merge-request}
